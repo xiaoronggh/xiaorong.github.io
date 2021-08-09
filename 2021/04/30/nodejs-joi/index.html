@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  
+    <link rel="icon" href="">
+  
+    
+  <title>nodejs 校验框架joi | 奋斗的斗斗的博客</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class="logo" href="/">
+      <span>奋斗的斗斗的博客</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id="post">
+  <div class="content">
+    <article>
+        <section class="content markdown-body">
+          <h1>nodejs 校验框架joi</h1>
+          <div class="post-meta">
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2021年04月30日</time>
+            
+              | <i class="fa fa-folder-open-o" aria-hidden="true"></i> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/nodejs/">nodejs</a>
+  </div>
+
+
+
+            
+            
+              | 
+                  <i class="fa fa-tags" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#js" class="tag">js</a>
+
+  <a href="/tags/#nodejs" class="tag">nodejs</a>
+
+  <a href="/tags/#joi" class="tag">joi</a>
+
+  <a href="/tags/#web" class="tag">web</a>
+
+
+            
+          </div>
+          <p>joi 是一个nodejs的校验框架，用来校验前端传入参数。joi使用方便，能够支持大部分场景，大量减少校验代码的编写。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm i @commercial/joi --save</span><br></pre></td></tr></table></figure>
+<h2 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h2><p>我们模拟一下注册用户的场景，我们需要输入昵称、年龄、性别、手机号。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Joi = <span class="built_in">require</span>(<span class="string">'@commercial/joi'</span>);</span><br><span class="line"><span class="comment">// 请求参数</span></span><br><span class="line"><span class="keyword">let</span> data = &#123;</span><br><span class="line">	nickName: <span class="string">'张三'</span>,</span><br><span class="line">	age: <span class="number">20</span>,</span><br><span class="line">	sex: <span class="string">'1'</span>, </span><br><span class="line">	phone: <span class="string">'13133332222'</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> validateRegister = Joi.object(&#123;</span><br><span class="line">	nickName: Joi.string().required(),  <span class="comment">// string 类型</span></span><br><span class="line">	age: Joi.number().integer().required(), <span class="comment">// number 类型</span></span><br><span class="line">	sex: Joi.number().integer().valid(<span class="number">1</span>,<span class="number">2</span>).required(),</span><br><span class="line">	phone: Joi.string().required(),</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> validResult = Joi.validate(data, validateRegister);</span><br><span class="line"><span class="keyword">if</span> (validResult.error) &#123; <span class="comment">// 如果有值表示校验不通过</span></span><br><span class="line">	<span class="built_in">console</span>.log(validResult.error.message)</span><br><span class="line">&#125; <span class="keyword">else</span> &#123; <span class="comment">// 校验通过</span></span><br><span class="line">	<span class="keyword">let</span> user = validResult.value;</span><br><span class="line">	<span class="built_in">console</span>.log(<span class="built_in">JSON</span>.stringify(user));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Joi.Object</code> 表示我们传入的一个是对象<br><code>required</code>表示这个属性是必填的<br><code>valid(1,2)</code> 表示<code>sex</code>的值只能是1或2</p>
+<p>打印结果:<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="string">"nickName"</span>:<span class="string">"张三"</span>,<span class="string">"age"</span>:20,<span class="string">"sex"</span>:1,<span class="string">"phone"</span>:<span class="string">"13133332222"</span>&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong><em>注意</em></strong> 我们传入的<code>sex</code>是一个字符串类型，经过<code>Joi</code>转换输出的是数字类型，Joi已经给我们进行了类型转换。</p>
+<h2 id="常用规则"><a href="#常用规则" class="headerlink" title="常用规则"></a>常用规则</h2><h3 id="对象"><a href="#对象" class="headerlink" title="对象"></a>对象</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 如果type为1时，name必填</span></span><br><span class="line">Joi.object(&#123;</span><br><span class="line">	type: Joi.number().integer().valid(<span class="number">1</span>,<span class="number">2</span>),</span><br><span class="line">	name: Joi.string().when(<span class="string">'type'</span>, &#123;<span class="attr">is</span>: <span class="number">1</span>, <span class="attr">then</span>: Joi.required()&#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<h3 id="数字"><a href="#数字" class="headerlink" title="数字"></a>数字</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1 </span></span><br><span class="line">Joi.object(&#123;<span class="attr">a</span>: Joi.number().integer()&#125;)</span><br><span class="line"><span class="comment">// 2 指定参数</span></span><br><span class="line">Joi.number().integer().valid(<span class="number">1</span>,<span class="number">2</span>)</span><br><span class="line"><span class="comment">// 3 指定最小和最小</span></span><br><span class="line">Joi.number().integer().min(<span class="number">1</span>).max(<span class="number">10</span>)</span><br><span class="line"><span class="comment">// 4 大于 1 greater</span></span><br><span class="line">Joi.number().integer().greater(<span class="number">1</span>)</span><br><span class="line"><span class="comment">// 5 小于 10 less</span></span><br><span class="line">Joi.number().integer().less(<span class="number">10</span>)</span><br><span class="line"><span class="comment">// 6 默认 1</span></span><br><span class="line">Joi.number().default(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1</span></span><br><span class="line">Joi.string()</span><br><span class="line"><span class="comment">// 2 允许为空</span></span><br><span class="line">Joi.string().allow(<span class="string">''</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 数组</span></span><br><span class="line">Joi.array().items(Joi.object)</span><br></pre></td></tr></table></figure>
+<h2 id="自定义规则"><a href="#自定义规则" class="headerlink" title="自定义规则"></a>自定义规则</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Joi = <span class="built_in">require</span>(<span class="string">'@commercial/joi'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> customJoi = Joi.extend(<span class="function">(<span class="params">joi</span>) =&gt;</span> (&#123;</span><br><span class="line">    base: Joi.number(),</span><br><span class="line">    name: <span class="string">'number'</span>,</span><br><span class="line">    language: &#123;</span><br><span class="line">        round: <span class="string">'必须是一个number'</span></span><br><span class="line">    &#125;,</span><br><span class="line">    pre(value, state, options) &#123;</span><br><span class="line">        <span class="keyword">if</span> (options.covert &amp;&amp; <span class="keyword">this</span>._flags.round) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">Math</span>.round(value);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> value;</span><br><span class="line">    &#125;,</span><br><span class="line">    rules: [</span><br><span class="line">        &#123;</span><br><span class="line">            name: <span class="string">'round'</span>,</span><br><span class="line">            setup(params) &#123;</span><br><span class="line">                <span class="keyword">this</span>._flags.round = <span class="literal">true</span>;</span><br><span class="line">            &#125;,</span><br><span class="line">            validate(params, value, state, options) &#123;</span><br><span class="line">                <span class="keyword">if</span> (value % <span class="number">1</span> !== <span class="number">0</span>) &#123;</span><br><span class="line">                    <span class="comment">// Generate an error, state and options need to be passed</span></span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">this</span>.createError(<span class="string">'number.round'</span>, &#123; <span class="attr">v</span>: value &#125;, state, options);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> value; <span class="comment">// Everything is OK</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;));</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> schema = customJoi.number().round();</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> result = Joi.validate(<span class="number">1</span>, schema);</span><br><span class="line"><span class="built_in">console</span>.log(result.value);</span><br></pre></td></tr></table></figure>
+<p>从代码中可以推断出来执行顺序, rules.setup =&gt; pre =&gt; rules.validate</p>
+
+        </section>
+    </article>
+    
+        
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-number">1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用示例"><span class="toc-number">2.</span> <span class="toc-text">使用示例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#常用规则"><span class="toc-number">3.</span> <span class="toc-text">常用规则</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#对象"><span class="toc-number">3.1.</span> <span class="toc-text">对象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数字"><span class="toc-number">3.2.</span> <span class="toc-text">数字</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#字符串"><span class="toc-number">3.3.</span> <span class="toc-text">字符串</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数组"><span class="toc-number">3.4.</span> <span class="toc-text">数组</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自定义规则"><span class="toc-number">4.</span> <span class="toc-text">自定义规则</span></a></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2021 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath</a> &nbsp |
+    </div>
+    <div style="color:#080808">
+       &nbsp <blod><a href="http://www.beian.miit.gov.cn"> 京ICP备18025966号-1</a></blod>
+    </div>
+  </div>
+</footer>
+
+
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>
