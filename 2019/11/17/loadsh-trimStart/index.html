@@ -84,7 +84,7 @@
           </div>
           <p>开发nodejs后端，基本都要使用到loadsh这个module，loadsh是一个强大的工具包，里面提供了大量的关于Array，String操作的方法，<br>对于我们的开发提供了很大的便利，但是如果对于它提供的方法不了解的话，可能就会产生一些不必要的麻烦</p>
 <h2 id="trimStart"><a href="#trimStart" class="headerlink" title="trimStart"></a>trimStart</h2><p><a href="https://www.lodashjs.com/docs/latest#_trimstartstring-charswhitespace" target="_blank" rel="noopener">查看中文官网的介绍</a>，我们可以看到如下的介绍：</p>
-<p><img src="/2019/11/17/loadsh-trimStart/trimStart-1.png" alt="trimStart-1"></p>
+<p><img src="loadsh-trimStart/trimStart-1.png" alt="trimStart-1"></p>
 <p>该方法是用来移除字符串前面的指定的<code>空格</code>和<strong>字符</strong>，可以看到第二个参数是一个<code>string</code>类型。这里请重点关注一下<strong>字符</strong>。<br>接下来我们就可以在工作中使用该方法了，然后我写了一个如下的代码，就悲剧了。</p>
 <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> _ = <span class="built_in">require</span>(<span class="string">'loadsh'</span>);</span><br><span class="line"><span class="keyword">let</span> no = <span class="string">'2019001'</span>;</span><br><span class="line"><span class="keyword">let</span> number = _.trimStart(no,<span class="string">'2019'</span>);</span><br><span class="line">number = +number++;</span><br></pre></td></tr></table></figure>
 <p>如上的代码是一个用来生成order编码的代码，获取一个最新的编码，去掉了年份信息，对序号进行加1的操作，期望得到number为2，实际得到number为1。</p>

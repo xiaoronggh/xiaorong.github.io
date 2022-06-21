@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  
+    <link rel="icon" href="">
+  
+    
+  <title>java 虚拟机回收 | 奋斗的斗斗的博客</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class="logo" href="/">
+      <span>奋斗的斗斗的博客</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id="post">
+  <div class="content">
+    <article>
+        <section class="content markdown-body">
+          <h1>java 虚拟机回收</h1>
+          <div class="post-meta">
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2022年06月19日</time>
+            
+              | <i class="fa fa-folder-open-o" aria-hidden="true"></i> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/java/">java</a>/ <a class="article-category-link" href="/categories/java/jvm/">jvm</a>
+  </div>
+
+
+
+            
+            
+              | 
+                  <i class="fa fa-tags" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#java" class="tag">java</a>
+
+  <a href="/tags/#面试" class="tag">面试</a>
+
+  <a href="/tags/#jvm" class="tag">jvm</a>
+
+
+            
+          </div>
+          <h1 id="虚拟机"><a href="#虚拟机" class="headerlink" title="虚拟机"></a>虚拟机</h1><h2 id="垃圾回收算法"><a href="#垃圾回收算法" class="headerlink" title="垃圾回收算法"></a>垃圾回收算法</h2><h3 id="标记-清除"><a href="#标记-清除" class="headerlink" title="标记-清除"></a>标记-清除</h3><h4 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h4><ul>
+<li>分为标记和清除两个阶段</li>
+<li>标记，标记出来所有需要进行回收的对象</li>
+<li>清除，在标记完成之后，统一回收所有标记的对象（<strong>这里有人说可以反过来，标记存活的对象，回收未标记的对象，如果在标记过程中，产生了新的对象，可能会被误回收？</strong>）</li>
+</ul>
+<h4 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h4><ul>
+<li>执行效率不高，如果系统中存在大量的需要回收的对象，需要标记和清除大量的对象，执行效率跟需要回收的对象成正比</li>
+<li>空间碎片化，标记和清除之后，会产生大量的空间碎片，分配大对象的时候导致找不到内存，不得不触发另外一次垃圾回收</li>
+</ul>
+<h3 id="标记-复制"><a href="#标记-复制" class="headerlink" title="标记-复制"></a>标记-复制</h3><h4 id="原理-1"><a href="#原理-1" class="headerlink" title="原理"></a>原理</h4><ul>
+<li>将内存分成大小相等的两块，每次只使用期中的一块，当这一块的内存使用完了，就将存活的对象复制到另外一块上，然后把使用的清理掉</li>
+</ul>
+<h4 id="缺点-1"><a href="#缺点-1" class="headerlink" title="缺点"></a>缺点</h4><ul>
+<li>效率不是很高，因为每次都需要把内存复制到另外一块上。这个过程效率不高</li>
+</ul>
+<h3 id="标记整理"><a href="#标记整理" class="headerlink" title="标记整理"></a>标记整理</h3><h4 id="原理-2"><a href="#原理-2" class="headerlink" title="原理"></a>原理</h4><ul>
+<li>首先标记出来所有需要回收的对象，将这些对象都向着一端移动，直接清理掉边界一边的数据</li>
+</ul>
+<h3 id="分代收集"><a href="#分代收集" class="headerlink" title="分代收集"></a>分代收集</h3><h4 id="原理-3"><a href="#原理-3" class="headerlink" title="原理"></a>原理</h4><ul>
+<li>不同对象的生命周期是不一样的，我们可以考虑不同生命周期的对象，采用不同的收集算法，提高回收效率。</li>
+<li>一般把java堆分为新生代和老年代，分别采取不同的收集算法</li>
+<li>新生代，对象生命周期短，存活率短，回收频繁，因此可以采用标记复制算法，而且复制算法效率不高的情况，在hotspot中的survivor的设计得到缓解</li>
+<li>老年代，对象生命周期长，存活率高，回收频率低，可以采用标记清除，或者标记清除和标记整理的混合实现</li>
+</ul>
+<h3 id="增量收集算法"><a href="#增量收集算法" class="headerlink" title="增量收集算法"></a>增量收集算法</h3><h4 id="原理-4"><a href="#原理-4" class="headerlink" title="原理"></a>原理</h4><ul>
+<li>上面的算法都存在一个问题，在垃圾回收的时候，应用程序，将处于STW的状态，在这个状态下，应用程序线程都会挂起，暂停工作等待垃圾回收完成。如果回收的时间很长，将会影响用户的体验</li>
+<li>增量收集算法，将垃圾回收线程和应用程序线程，交替执行，每次只收集一小块区域，然后执行应用程序线程。直到完成垃圾回收</li>
+<li>采用的仍然是标记清除或标记整理算法</li>
+</ul>
+<h4 id="缺点-2"><a href="#缺点-2" class="headerlink" title="缺点"></a>缺点</h4><ul>
+<li>线程切换和上下文的切换，导致垃圾回收成本总体较高</li>
+</ul>
+<h3 id="分区算法（G1）"><a href="#分区算法（G1）" class="headerlink" title="分区算法（G1）"></a>分区算法（G1）</h3><h4 id="原理-5"><a href="#原理-5" class="headerlink" title="原理"></a>原理</h4><ul>
+<li>在增量收集算法的基础上，进行改良。同样是将一块内存区域分成多个小块，根据GC停顿时间，来决定要收集的内存区域。减少一次要停顿的时间</li>
+</ul>
+<h3 id="指针碰撞和空闲列表"><a href="#指针碰撞和空闲列表" class="headerlink" title="指针碰撞和空闲列表"></a>指针碰撞和空闲列表</h3><h4 id="指针碰撞"><a href="#指针碰撞" class="headerlink" title="指针碰撞"></a>指针碰撞</h4><ul>
+<li>如果内存空间以规整和有序的方式分布，即已用和未用的内存都各自一边，彼此之间维系着一个记录下一次分配起始点的标记指针，当为新对象分配内存时，只需要通过修改指针的偏移量将新对象分配在第一个空闲内存位置上，这种分配方式就叫做指针碰撞（Bump the Pointer）</li>
+</ul>
+<h4 id="空闲列表"><a href="#空闲列表" class="headerlink" title="空闲列表"></a>空闲列表</h4><ul>
+<li>如果内存不是规则的，虚拟机就会维护一个空闲列表，来记录可用的内存空间，每次内存分配后都去动态的维护空闲列表。</li>
+</ul>
+<h2 id="java中的垃圾回收器"><a href="#java中的垃圾回收器" class="headerlink" title="java中的垃圾回收器"></a>java中的垃圾回收器</h2><p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-19/image-20220619190946447.png" alt="image-20220619190946447"></p>
+<h3 id="serial-回收器"><a href="#serial-回收器" class="headerlink" title="serial 回收器"></a>serial 回收器</h3><p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-19/image-20220619191355188.png" alt="image-20220619191355188"></p>
+<h4 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h4><ul>
+<li>串行化，单线程。在垃圾回收的时候，必须暂停其他线程的工作</li>
+<li>工作在新生代区域</li>
+<li>采用标记复制算法</li>
+</ul>
+<h3 id="serial-old-回收器"><a href="#serial-old-回收器" class="headerlink" title="serial old 回收器"></a>serial old 回收器</h3><h4 id="特点-1"><a href="#特点-1" class="headerlink" title="特点"></a>特点</h4><ul>
+<li>工作在老年代</li>
+<li>采用标记整理算法</li>
+<li>同样的串行化，单线程，高效</li>
+<li>可以跟新生代的ParallelScavenge回收器配合使用</li>
+</ul>
+<h3 id="ParNew-回收器"><a href="#ParNew-回收器" class="headerlink" title="ParNew 回收器"></a>ParNew 回收器</h3><p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-19/image-20220619192434150.png" alt="image-20220619192434150"></p>
+<h4 id="特点-2"><a href="#特点-2" class="headerlink" title="特点"></a>特点</h4><ul>
+<li>原理同Serial回收器，采用多线程，同样需要暂停所有的线程</li>
+<li>工作在新生代区域</li>
+</ul>
+<h4 id="Parallel-Scavenge-回收器"><a href="#Parallel-Scavenge-回收器" class="headerlink" title="Parallel Scavenge 回收器"></a>Parallel Scavenge 回收器</h4><p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-19/image-20220619193317947.png" alt="image-20220619193317947"></p>
+<h4 id="特点-3"><a href="#特点-3" class="headerlink" title="特点"></a>特点</h4><ul>
+<li>采用了标记复制算法，并行回收。</li>
+<li><strong>吞吐量优先的垃圾回收器</strong>，使用自适应的调节策略</li>
+<li>工作在新生代区域</li>
+</ul>
+<h3 id="Parallel-old-回收器"><a href="#Parallel-old-回收器" class="headerlink" title="Parallel old 回收器"></a>Parallel old 回收器</h3><ul>
+<li>parallel 回收器的老年代版本，使用并行回收</li>
+<li>采用标记整理算法，用来替代老年代的Serial old</li>
+</ul>
+<h3 id="CMS回收器"><a href="#CMS回收器" class="headerlink" title="CMS回收器"></a>CMS回收器</h3><p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-19/image-20220619193543985.png" alt="image-20220619193543985"></p>
+<h4 id="特点-4"><a href="#特点-4" class="headerlink" title="特点"></a>特点</h4><ul>
+<li>工作在老年代</li>
+<li>采用标记-清除算法</li>
+<li>是虚拟机上真正意义上的第一款并发收集器，让垃圾回收线程和用户工作线程同时运行</li>
+<li>无法跟新生代的，parallel 回收器进行配置工作</li>
+</ul>
+<h4 id="缺点-3"><a href="#缺点-3" class="headerlink" title="缺点"></a>缺点</h4><ul>
+<li>无法清除浮动垃圾，并发清除阶段产生的垃圾只能下次再进行回收</li>
+<li>可能因为内存不够导致<code>Concurrent Mode Failure</code>，会采用serial old 替代收集</li>
+<li>空间碎片问题</li>
+</ul>
+<h4 id="原理-6"><a href="#原理-6" class="headerlink" title="原理"></a>原理</h4><ul>
+<li>初始标记阶段, 并发标记阶段，重新标记阶段，并发清除阶段</li>
+<li>初始标记阶段，采用STW机制，只标记GCROOT能够到达的对象</li>
+<li>并发标记阶段，跟用户线程一起工作。遍历GCROOT对象能够到达的对象，标记所有的可达对象。会比较耗时</li>
+<li>采用STW机制，标记因为用户程序改动，导致对象变动的记录。时间上大于初始标记，小于并发标记</li>
+<li>并发清除阶段，删除已经标记为死亡的对象，可以跟用户线程一起工作</li>
+</ul>
+<h3 id="G1回收器"><a href="#G1回收器" class="headerlink" title="G1回收器"></a>G1回收器</h3><p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-21/image-20220621104816669.png" alt="image-20220621104816669"></p>
+<h4 id="特点-5"><a href="#特点-5" class="headerlink" title="特点"></a>特点</h4><ul>
+<li>分代收集</li>
+<li>整体上看是<strong>标记整理</strong>算法，单个region看是<strong>标记复制</strong>算法，没有空间碎片的问题</li>
+<li>可预测的停顿</li>
+</ul>
+<h3 id="名词"><a href="#名词" class="headerlink" title="名词"></a>名词</h3><h4 id="Minor-GC"><a href="#Minor-GC" class="headerlink" title="Minor GC"></a>Minor GC</h4><ul>
+<li>如果Eden 如果没有足够的内存进行分配的时候，就会进行一次Minor GC</li>
+<li>在新生代执行，比较频繁，效率比较高</li>
+</ul>
+<h3 id="Mixed-GC"><a href="#Mixed-GC" class="headerlink" title="Mixed GC"></a>Mixed GC</h3><p>当整个堆内存使用达到一定比例(默认是45%)，会触发Mixed GC</p>
+<ol>
+<li>初始标记：整个过程STW，标记了从GC Root可达的对象</li>
+<li>并发标记：这个阶段从GC Roots 开始对heap中的对象标记，标记线程与应用线程并行执行，并且收集各个Region的存活对象信息。</li>
+<li>重新标记：标记那些在并发标记发生变化的对象（STAB）。</li>
+<li>筛选回收：如果发现一个Region中没有存活对象，则把该Region加入到空闲列表中，根据用户所期望的GC停顿时间（可以用JVM参数 -XX:MaxGCPauseMillis指定）来制定回收计划。</li>
+</ol>
+<ul>
+<li><h4 id="Major-GC-Full-GC"><a href="#Major-GC-Full-GC" class="headerlink" title="Major GC/Full GC"></a>Major GC/Full GC</h4></li>
+<li><p>老年代GC ，采用Serial old GC 算法进行回收</p>
+</li>
+</ul>
+<h4 id="原理-7"><a href="#原理-7" class="headerlink" title="原理"></a>原理</h4><ul>
+<li>区域化分代收集，默认将内存分成多个大小相等的region，每个区域进行分代，分为Eden区（新生代-对象初始化区域），Survivor区（新生代，对象存活区域），old区（老年代），Humongous（<strong>巨型对象，可能会独占一个区域或多个连续的分区</strong>）</li>
+<li>RSet(Remember Set) 记录了本Region中对象引用的关系，在垃圾回收的是，避免了扫描整个Region区域</li>
+<li>CSet(Collection Set) 记录了一次垃圾回收将要回收的区域</li>
+</ul>
+
+        </section>
+    </article>
+    
+        
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#虚拟机"><span class="toc-number">1.</span> <span class="toc-text">虚拟机</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#垃圾回收算法"><span class="toc-number">1.1.</span> <span class="toc-text">垃圾回收算法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#标记-清除"><span class="toc-number">1.1.1.</span> <span class="toc-text">标记-清除</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#原理"><span class="toc-number">1.1.1.1.</span> <span class="toc-text">原理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#缺点"><span class="toc-number">1.1.1.2.</span> <span class="toc-text">缺点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#标记-复制"><span class="toc-number">1.1.2.</span> <span class="toc-text">标记-复制</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#原理-1"><span class="toc-number">1.1.2.1.</span> <span class="toc-text">原理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#缺点-1"><span class="toc-number">1.1.2.2.</span> <span class="toc-text">缺点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#标记整理"><span class="toc-number">1.1.3.</span> <span class="toc-text">标记整理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#原理-2"><span class="toc-number">1.1.3.1.</span> <span class="toc-text">原理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分代收集"><span class="toc-number">1.1.4.</span> <span class="toc-text">分代收集</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#原理-3"><span class="toc-number">1.1.4.1.</span> <span class="toc-text">原理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#增量收集算法"><span class="toc-number">1.1.5.</span> <span class="toc-text">增量收集算法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#原理-4"><span class="toc-number">1.1.5.1.</span> <span class="toc-text">原理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#缺点-2"><span class="toc-number">1.1.5.2.</span> <span class="toc-text">缺点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分区算法（G1）"><span class="toc-number">1.1.6.</span> <span class="toc-text">分区算法（G1）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#原理-5"><span class="toc-number">1.1.6.1.</span> <span class="toc-text">原理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#指针碰撞和空闲列表"><span class="toc-number">1.1.7.</span> <span class="toc-text">指针碰撞和空闲列表</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#指针碰撞"><span class="toc-number">1.1.7.1.</span> <span class="toc-text">指针碰撞</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#空闲列表"><span class="toc-number">1.1.7.2.</span> <span class="toc-text">空闲列表</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#java中的垃圾回收器"><span class="toc-number">1.2.</span> <span class="toc-text">java中的垃圾回收器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#serial-回收器"><span class="toc-number">1.2.1.</span> <span class="toc-text">serial 回收器</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#特点"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">特点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#serial-old-回收器"><span class="toc-number">1.2.2.</span> <span class="toc-text">serial old 回收器</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#特点-1"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">特点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ParNew-回收器"><span class="toc-number">1.2.3.</span> <span class="toc-text">ParNew 回收器</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#特点-2"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">特点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Parallel-Scavenge-回收器"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">Parallel Scavenge 回收器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#特点-3"><span class="toc-number">1.2.3.3.</span> <span class="toc-text">特点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Parallel-old-回收器"><span class="toc-number">1.2.4.</span> <span class="toc-text">Parallel old 回收器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CMS回收器"><span class="toc-number">1.2.5.</span> <span class="toc-text">CMS回收器</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#特点-4"><span class="toc-number">1.2.5.1.</span> <span class="toc-text">特点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#缺点-3"><span class="toc-number">1.2.5.2.</span> <span class="toc-text">缺点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#原理-6"><span class="toc-number">1.2.5.3.</span> <span class="toc-text">原理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#G1回收器"><span class="toc-number">1.2.6.</span> <span class="toc-text">G1回收器</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#特点-5"><span class="toc-number">1.2.6.1.</span> <span class="toc-text">特点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#名词"><span class="toc-number">1.2.7.</span> <span class="toc-text">名词</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Minor-GC"><span class="toc-number">1.2.7.1.</span> <span class="toc-text">Minor GC</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Mixed-GC"><span class="toc-number">1.2.8.</span> <span class="toc-text">Mixed GC</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Major-GC-Full-GC"><span class="toc-number">1.2.8.1.</span> <span class="toc-text">Major GC/Full GC</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#原理-7"><span class="toc-number">1.2.8.2.</span> <span class="toc-text">原理</span></a></li></ol></li></ol></li></ol></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2022 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>

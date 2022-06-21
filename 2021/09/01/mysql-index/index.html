@@ -86,14 +86,14 @@
 <h4 id="索引分析"><a href="#索引分析" class="headerlink" title="索引分析"></a>索引分析</h4><p>执行如下的sql，查看执行结果</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 第一个sql</span></span><br><span class="line"><span class="keyword">explain</span> <span class="keyword">SELECT</span> * <span class="keyword">from</span> test_index t <span class="keyword">where</span> t.b = <span class="number">1</span> <span class="keyword">and</span> t.a= <span class="number">1</span>;</span><br><span class="line"><span class="comment"># 第二个sql</span></span><br><span class="line"><span class="keyword">explain</span> <span class="keyword">SELECT</span> * <span class="keyword">from</span> test_index t <span class="keyword">where</span> t.a = <span class="number">1</span> <span class="keyword">and</span> t.b= <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
 <p>第一个sql执行结果</p>
-<p><img src="/2021/09/01/mysql-index/index1.png" alt="sql执行结果1"></p>
+<p><img src="mysql-index/index1.png" alt="sql执行结果1"></p>
 <p>第二个sql执行结果</p>
-<p><img src="/2021/09/01/mysql-index/index2.png" alt="sql执行结果2"></p>
+<p><img src="mysql-index/index2.png" alt="sql执行结果2"></p>
 <p>可以看到两个sql执行结果分析是一致的，也就是where条件字段不影响索引的使用</p>
 <p>我们去掉sql中的<strong>b</strong>条件，再次执行sql</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">explain</span> <span class="keyword">SELECT</span> * <span class="keyword">from</span> test_index t <span class="keyword">where</span> t.a= <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
 <p>执行结果如下：</p>
-<p><img src="/2021/09/01/mysql-index/index3.png" alt="执行结果分析"></p>
+<p><img src="mysql-index/index3.png" alt="执行结果分析"></p>
 <p>此时我们可以看到，我们的索引失效了，进行了全表查询</p>
 <h3 id="explain-字段说明"><a href="#explain-字段说明" class="headerlink" title="explain 字段说明"></a>explain 字段说明</h3><h4 id="rows"><a href="#rows" class="headerlink" title="rows"></a>rows</h4><p>表示扫描了多少行</p>
 <h4 id="extra"><a href="#extra" class="headerlink" title="extra"></a>extra</h4><h5 id="Using-fileSort"><a href="#Using-fileSort" class="headerlink" title="Using fileSort"></a>Using fileSort</h5><p>告诉我们，mysql进行了排序操作。</p>
