@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  
+    <link rel="icon" href="">
+  
+    
+  <title>共识算法 raft | 奋斗的斗斗的博客</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class="logo" href="/">
+      <span>奋斗的斗斗的博客</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id="post">
+  <div class="content">
+    <article>
+        <section class="content markdown-body">
+          <h1>共识算法 raft</h1>
+          <div class="post-meta">
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2022年06月23日</time>
+            
+              | <i class="fa fa-folder-open-o" aria-hidden="true"></i> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/算法/">算法</a>
+  </div>
+
+
+
+            
+            
+              | 
+                  <i class="fa fa-tag" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#共识算法" class="tag">共识算法</a>
+
+
+            
+          </div>
+          <p>raft是一种易于理解的一致性算法</p>
+<p>raft算法主要包含leader选举和日志复制，日志复制采用<a href="https://baike.baidu.com/item/%E4%BA%8C%E9%98%B6%E6%AE%B5%E6%8F%90%E4%BA%A4/15735523" target="_blank" rel="noopener">两阶段提交</a>，保证日志安全提交</p>
+<p>附上一个<a href="https://raft.github.io/raftscope/index.html" target="_blank" rel="noopener">官方动画</a>，来看下raft的原理</p>
+<h1 id="选举"><a href="#选举" class="headerlink" title="选举"></a>选举</h1><p>raft有三个角色，通过通信来选举出来leader</p>
+<p>三个角色如下：</p>
+<ul>
+<li><strong>Leader</strong> 负责接收客户端的请求，并将日志复制到其他节点，并告知其他节点何时应用这些日志是安全的</li>
+<li><strong>Candidate</strong> 候选人，可以参与<strong>Leader</strong>的竞选</li>
+<li><strong>Follower</strong>, 跟随者，负责响应来自<strong>Leader</strong>的请求,节点启动之后的默认角色</li>
+</ul>
+<p>角色转换如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-23/image-20220623205629327.png" alt="image-20220623205629327"></p>
+<ul>
+<li>当一个节点开始启动的时候，默认的角色是<strong>Follwer</strong>,当前角色会启动一个定时，如果在规定的时间内没有收到来自<strong>Leader</strong>的心跳，那么就会发起新的选举，邀请其他节点给自己投票，当前的角色会变成<strong>Candidate</strong></li>
+<li>当<strong>Candidate</strong>收到超过半数的投票通过之后，就能够成功当选为<strong>Leader</strong>，开始处理客户端的请求，并将请求日志复制给其他节点</li>
+</ul>
+<h2 id="安全"><a href="#安全" class="headerlink" title="安全"></a>安全</h2><p>在选择Leader的时候，我们肯定希望选择出来的Leader是数据最全的，raft在发送日志上做了处理。这里简单用json做下说明</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="string">"term"</span>: <span class="number">11</span>, <span class="comment">// 任期</span></span><br><span class="line">	<span class="string">"seq"</span>: <span class="number">1</span>, <span class="comment">// 序号</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>每个节点都会有一个<strong>任期</strong>，<strong>Leader</strong>在发送每个日志的时候都会加上一个递增的<strong>序号</strong>。</p>
+<p>在选举投票的时候，每个节点，只会把票投给日志最新的节点数据。即任期最大，或者任期相同日志序号大的节点。</p>
+<p>如果发起投票节点不是最新节点，那么当前节点会投票给自己。</p>
+<h1 id="日志复制"><a href="#日志复制" class="headerlink" title="日志复制"></a>日志复制</h1><p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-24/image-20220624145522764.png" alt="image-20220624145522764"></p>
+<ul>
+<li>客户端发送请求到某一个节点<ul>
+<li>如果当前节点是<strong>Leader</strong>，直接响应客户端的请求，将日志发送到其他从节点。超过半数的节点响应成功，返回客户端成功</li>
+<li>如果当前节点是<strong>Follower</strong>,会告诉客户端主节点信息，客户端会去请求主节点</li>
+</ul>
+</li>
+</ul>
+<h1 id="脑裂"><a href="#脑裂" class="headerlink" title="脑裂"></a>脑裂</h1><h2 id="不满足"><a href="#不满足" class="headerlink" title="不满足"></a>不满足</h2><p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-24/image-20220624155200192.png" alt="image-20220624155200192"></p>
+<p>上图所示，假设发生网络故障，只有S4和S5节点存活，其中S4是<strong>Leader</strong>节点。此时不能满足半数条件</p>
+<p>我们向S4节点发送请求信息，可以看到图中S4和S5都收到了请求信息，可见S4将日志<strong>复制</strong>到了S5。但是因为S4不能收到超过半数的响应，所以导致这个请求不能被提交，最新的日志都是虚线</p>
+<p>此时<strong>Leader</strong>会一直尝试处理该请求，此时如果有一个节点加入，满足了提交的条件，还会继续提交该日志，不会丢失。</p>
+<p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-24/image-20220624160928627.png" alt="image-20220624160928627"></p>
+<p>注意，上述场景中，S4是Leader角色。如果S4不是Leader角色，那么此时会发生选举操作，因为不能满足半数条件，导致不能选举出来新的Leader</p>
+<h2 id="满足条件"><a href="#满足条件" class="headerlink" title="满足条件"></a>满足条件</h2><p>脑裂之后，还有三个节点存数，满足半数条件，可以正常的提供服务</p>
+<p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-24/image-20220624161850042.png" alt="image-20220624161850042"></p>
+<h2 id="恢复网络"><a href="#恢复网络" class="headerlink" title="恢复网络"></a>恢复网络</h2><p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-24/image-20220624162103655.png" alt="image-20220624162103655"></p>
+<p>因为网络分区之后，只有一个可以区域可以访问，因为恢复网络之后，S4和S5只要把新的数据同步过来就好了。</p>
+
+        </section>
+    </article>
+    
+        
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#选举"><span class="toc-number">1.</span> <span class="toc-text">选举</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#安全"><span class="toc-number">1.1.</span> <span class="toc-text">安全</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#日志复制"><span class="toc-number">2.</span> <span class="toc-text">日志复制</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#脑裂"><span class="toc-number">3.</span> <span class="toc-text">脑裂</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#不满足"><span class="toc-number">3.1.</span> <span class="toc-text">不满足</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#满足条件"><span class="toc-number">3.2.</span> <span class="toc-text">满足条件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#恢复网络"><span class="toc-number">3.3.</span> <span class="toc-text">恢复网络</span></a></li></ol></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2022 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>

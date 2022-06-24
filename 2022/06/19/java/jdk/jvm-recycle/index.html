@@ -176,6 +176,7 @@
 <li>分代收集</li>
 <li>整体上看是<strong>标记整理</strong>算法，单个region看是<strong>标记复制</strong>算法，没有空间碎片的问题</li>
 <li>可预测的停顿</li>
+<li>使用SATB解决漏标</li>
 </ul>
 <h4 id="名词"><a href="#名词" class="headerlink" title="名词"></a>名词</h4><h5 id="Minor-GC"><a href="#Minor-GC" class="headerlink" title="Minor GC"></a>Minor GC</h5><ul>
 <li>如果Eden 如果没有足够的内存进行分配的时候，就会进行一次Minor GC</li>
@@ -192,11 +193,15 @@
 <li><h5 id="Major-GC-Full-GC"><a href="#Major-GC-Full-GC" class="headerlink" title="Major GC/Full GC"></a>Major GC/Full GC</h5></li>
 <li><p>老年代GC ，采用Serial old GC 算法进行回收</p>
 </li>
+<li>当Mixed GC回收速度赶不上，就会使用Serial old gc进行算法的回收</li>
 </ul>
 <h4 id="原理-7"><a href="#原理-7" class="headerlink" title="原理"></a>原理</h4><ul>
-<li>区域化分代收集，默认将内存分成多个大小相等的region，每个区域进行分代，分为Eden区（新生代-对象初始化区域），Survivor区（新生代，对象存活区域），old区（老年代），Humongous（<strong>巨型对象，可能会独占一个区域或多个连续的分区</strong>）</li>
-<li>RSet(Remember Set) 记录了本Region中对象引用的关系，在垃圾回收的是，避免了扫描整个Region区域</li>
-<li>CSet(Collection Set) 记录了一次垃圾回收将要回收的区域</li>
+<li><p>区域化分代收集，默认将内存分成多个大小相等的region，每个区域进行分代，分为Eden区（新生代-对象初始化区域），Survivor区（新生代，对象存活区域），old区（老年代），Humongous（<strong>巨型对象，可能会独占一个区域或多个连续的分区</strong>）</p>
+</li>
+<li><p>RSet(Remember Set) 记录了本Region中对象引用的关系，在垃圾回收的是，避免了扫描整个Region区域</p>
+</li>
+<li><p>CSet(Collection Set) 记录了一次垃圾回收将要回收的区域</p>
+</li>
 </ul>
 
         </section>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  
+    <link rel="icon" href="">
+  
+    
+  <title>jdk8时间类 | 奋斗的斗斗的博客</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class="logo" href="/">
+      <span>奋斗的斗斗的博客</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id="post">
+  <div class="content">
+    <article>
+        <section class="content markdown-body">
+          <h1>jdk8时间类</h1>
+          <div class="post-meta">
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2022年04月16日</time>
+            
+              | <i class="fa fa-folder-open-o" aria-hidden="true"></i> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/jdk/">jdk</a>
+  </div>
+
+
+
+            
+            
+              | 
+                  <i class="fa fa-tag" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#LocalDateTime" class="tag">LocalDateTime</a>
+
+
+            
+          </div>
+          <p>记录jdk相关的时间类的使用方式</p>
+<h1 id="类"><a href="#类" class="headerlink" title="类"></a>类</h1><p>相关的类是在<code>java.time</code>这个包下面，这个包是线程安全的</p>
+<h2 id="LocalDateTime"><a href="#LocalDateTime" class="headerlink" title="LocalDateTime"></a>LocalDateTime</h2><p>有点类似<code>Calendar</code>,不带时区的日期时间。</p>
+<h2 id="Instant"><a href="#Instant" class="headerlink" title="Instant"></a>Instant</h2><p>存在时区的问题，默认使用的是UTC的时间。时间可以精确到纳秒级别</p>
+<p>有点类似<code>java.util.Date</code></p>
+<h1 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h1><h2 id="获取默认的时间"><a href="#获取默认的时间" class="headerlink" title="获取默认的时间"></a>获取默认的时间</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.time.LocalDateTime;</span><br><span class="line"></span><br><span class="line">LocalDateTime now = LocalDateTime.now();</span><br></pre></td></tr></table></figure>
+<h2 id="字符串跟时间的相互转换"><a href="#字符串跟时间的相互转换" class="headerlink" title="字符串跟时间的相互转换"></a>字符串跟时间的相互转换</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.time.format.DateTimeFormatter;</span><br><span class="line"><span class="keyword">import</span> java.time.LocalDateTime;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 字符串转时间</span></span><br><span class="line">DateTimeFormatter df = DateTimeFormatter.ofPattern(<span class="string">"yyyy-MM-dd HH:mm:ss"</span>);</span><br><span class="line">LocalDateTime startTime = LocalDateTime.parse(<span class="string">"2022-03-25 14:00:00"</span>, df);</span><br><span class="line"><span class="comment">// 时间转字符串</span></span><br><span class="line">DateTimeFormatter df = DateTimeFormatter.ofPattern(<span class="string">"yyyy-MM-dd HH:mm:ss"</span>);</span><br><span class="line">String timeStr = df.format(LocalDateTime.now());</span><br></pre></td></tr></table></figure>
+<h2 id="毫秒和时间相互转换"><a href="#毫秒和时间相互转换" class="headerlink" title="毫秒和时间相互转换"></a>毫秒和时间相互转换</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 时间转毫秒</span></span><br><span class="line"><span class="keyword">long</span> mill = LocalDateTime.now().toInstant(ZoneOffset.of(<span class="string">"+8"</span>)).toEpochMilli();</span><br><span class="line"><span class="comment">// 毫秒转时间</span></span><br><span class="line">LocalDateTime.ofInstant(Instant.ofEpochMilli(mill), ZoneId.systemDefault());</span><br></pre></td></tr></table></figure>
+<h2 id="加减指定时间单位的数据"><a href="#加减指定时间单位的数据" class="headerlink" title="加减指定时间单位的数据"></a>加减指定时间单位的数据</h2><p>通过<code>LocalDateTime</code>我们可以很方便的加减天数或月数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取当前时间</span></span><br><span class="line">LocalDateTime now = LocalDateTime.now();</span><br><span class="line"><span class="comment">// 加一天</span></span><br><span class="line">LocalDateTime addOneDay = now.plusDays(<span class="number">1</span>);</span><br><span class="line"><span class="comment">// 通过指定时间单位进行加减</span></span><br><span class="line">LocalDateTime addOneMonths = now.plus(<span class="number">1</span>, ChronoUnit.MONTHS);</span><br></pre></td></tr></table></figure>
+<h2 id="周相关的操作"><a href="#周相关的操作" class="headerlink" title="周相关的操作"></a>周相关的操作</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">LocalDateTime now = LocalDateTime.now();</span><br><span class="line"><span class="comment">// 获取当前周的周一</span></span><br><span class="line">LocalDateTime monday = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));</span><br><span class="line"><span class="comment">// 获取下周一</span></span><br><span class="line">LocalDateTime nextMonday = now.with(TemporalAdjusters.next(DayOfWeek.MONDAY));</span><br><span class="line"><span class="comment">// 获取本月第一个周一</span></span><br><span class="line">LocalDateTime firstMondayInMonth = now.with(TemporalAdjusters.firstInMonth(DayOfWeek.MONDAY));</span><br><span class="line"><span class="comment">// 获取本月最后一个周一</span></span><br><span class="line">LocalDateTime lastMondayInMonth = now.with(TemporalAdjusters.lastInMonth(DayOfWeek.MONDAY));</span><br></pre></td></tr></table></figure>
+
+        </section>
+    </article>
+    
+        
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#类"><span class="toc-number">1.</span> <span class="toc-text">类</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#LocalDateTime"><span class="toc-number">1.1.</span> <span class="toc-text">LocalDateTime</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Instant"><span class="toc-number">1.2.</span> <span class="toc-text">Instant</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#实例"><span class="toc-number">2.</span> <span class="toc-text">实例</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#获取默认的时间"><span class="toc-number">2.1.</span> <span class="toc-text">获取默认的时间</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#字符串跟时间的相互转换"><span class="toc-number">2.2.</span> <span class="toc-text">字符串跟时间的相互转换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#毫秒和时间相互转换"><span class="toc-number">2.3.</span> <span class="toc-text">毫秒和时间相互转换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#加减指定时间单位的数据"><span class="toc-number">2.4.</span> <span class="toc-text">加减指定时间单位的数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#周相关的操作"><span class="toc-number">2.5.</span> <span class="toc-text">周相关的操作</span></a></li></ol></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2022 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>
