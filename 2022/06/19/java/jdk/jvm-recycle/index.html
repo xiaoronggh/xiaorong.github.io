@@ -124,8 +124,8 @@
 <h4 id="空闲列表"><a href="#空闲列表" class="headerlink" title="空闲列表"></a>空闲列表</h4><ul>
 <li>如果内存不是规则的，虚拟机就会维护一个空闲列表，来记录可用的内存空间，每次内存分配后都去动态的维护空闲列表。</li>
 </ul>
-<h2 id="java中的垃圾回收器"><a href="#java中的垃圾回收器" class="headerlink" title="java中的垃圾回收器"></a>java中的垃圾回收器</h2><p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-19/image-20220619190946447.png" alt="image-20220619190946447"></p>
-<h3 id="serial-回收器"><a href="#serial-回收器" class="headerlink" title="serial 回收器"></a>serial 回收器</h3><p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-19/image-20220619191355188.png" alt="image-20220619191355188"></p>
+<h2 id="java中的垃圾回收器"><a href="#java中的垃圾回收器" class="headerlink" title="java中的垃圾回收器"></a>java中的垃圾回收器</h2><p><img src="https://raw.githubusercontents.com/xiaoronggh/images/main/2022-06-19/image-20220619190946447.png" alt="image-20220619190946447"></p>
+<h3 id="serial-回收器"><a href="#serial-回收器" class="headerlink" title="serial 回收器"></a>serial 回收器</h3><p><img src="https://raw.githubusercontents.com/xiaoronggh/images/main/2022-06-19/image-20220619191355188.png" alt="image-20220619191355188"></p>
 <h4 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h4><ul>
 <li>串行化，单线程。在垃圾回收的时候，必须暂停其他线程的工作</li>
 <li>工作在新生代区域</li>
@@ -137,12 +137,12 @@
 <li>同样的串行化，单线程，高效</li>
 <li>可以跟新生代的ParallelScavenge回收器配合使用</li>
 </ul>
-<h3 id="ParNew-回收器"><a href="#ParNew-回收器" class="headerlink" title="ParNew 回收器"></a>ParNew 回收器</h3><p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-19/image-20220619192434150.png" alt="image-20220619192434150"></p>
+<h3 id="ParNew-回收器"><a href="#ParNew-回收器" class="headerlink" title="ParNew 回收器"></a>ParNew 回收器</h3><p><img src="https://raw.githubusercontents.com/xiaoronggh/images/main/2022-06-19/image-20220619192434150.png" alt="image-20220619192434150"></p>
 <h4 id="特点-2"><a href="#特点-2" class="headerlink" title="特点"></a>特点</h4><ul>
 <li>原理同Serial回收器，采用多线程，同样需要暂停所有的线程</li>
 <li>工作在新生代区域</li>
 </ul>
-<h4 id="Parallel-Scavenge-回收器"><a href="#Parallel-Scavenge-回收器" class="headerlink" title="Parallel Scavenge 回收器"></a>Parallel Scavenge 回收器</h4><p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-19/image-20220619193317947.png" alt="image-20220619193317947"></p>
+<h4 id="Parallel-Scavenge-回收器"><a href="#Parallel-Scavenge-回收器" class="headerlink" title="Parallel Scavenge 回收器"></a>Parallel Scavenge 回收器</h4><p><img src="https://raw.githubusercontents.com/xiaoronggh/images/main/2022-06-19/image-20220619193317947.png" alt="image-20220619193317947"></p>
 <h4 id="特点-3"><a href="#特点-3" class="headerlink" title="特点"></a>特点</h4><ul>
 <li>采用了标记复制算法，并行回收。</li>
 <li><strong>吞吐量优先的垃圾回收器</strong>，使用自适应的调节策略</li>
@@ -152,7 +152,7 @@
 <li>parallel 回收器的老年代版本，使用并行回收</li>
 <li>采用标记整理算法，用来替代老年代的Serial old</li>
 </ul>
-<h3 id="CMS回收器"><a href="#CMS回收器" class="headerlink" title="CMS回收器"></a>CMS回收器</h3><p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-19/image-20220619193543985.png" alt="image-20220619193543985"></p>
+<h3 id="CMS回收器"><a href="#CMS回收器" class="headerlink" title="CMS回收器"></a>CMS回收器</h3><p><img src="https://raw.githubusercontents.com/xiaoronggh/images/main/2022-06-19/image-20220619193543985.png" alt="image-20220619193543985"></p>
 <h4 id="特点-4"><a href="#特点-4" class="headerlink" title="特点"></a>特点</h4><ul>
 <li>工作在老年代</li>
 <li>采用标记-清除算法</li>
@@ -171,7 +171,7 @@
 <li>采用STW机制，标记因为用户程序改动，导致对象变动的记录。时间上大于初始标记，小于并发标记</li>
 <li>并发清除阶段，删除已经标记为死亡的对象，可以跟用户线程一起工作</li>
 </ul>
-<h3 id="G1回收器"><a href="#G1回收器" class="headerlink" title="G1回收器"></a>G1回收器</h3><p><img src="https://raw.githubusercontent.com/xiaoronggh/images/main/2022-06-21/image-20220621104816669.png" alt="image-20220621104816669"></p>
+<h3 id="G1回收器"><a href="#G1回收器" class="headerlink" title="G1回收器"></a>G1回收器</h3><p><img src="https://raw.githubusercontents.com/xiaoronggh/images/main/2022-06-21/image-20220621104816669.png" alt="image-20220621104816669"></p>
 <h4 id="特点-5"><a href="#特点-5" class="headerlink" title="特点"></a>特点</h4><ul>
 <li>分代收集</li>
 <li>整体上看是<strong>标记整理</strong>算法，单个region看是<strong>标记复制</strong>算法，没有空间碎片的问题</li>
