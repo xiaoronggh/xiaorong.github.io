@@ -94,7 +94,7 @@
 <h3 id="Future"><a href="#Future" class="headerlink" title="Future"></a>Future</h3><p>Future 是JDK中内置的一个api，可以用来获取执行的结果，判断是否执行完成，但是是阻塞的。为此，netty提供了ChannelFutrue，它允许你注册一个监听器，在执行完毕时会自动调用监听器，通知结果。</p>
 <h3 id="回调"><a href="#回调" class="headerlink" title="回调"></a>回调</h3><p>这里说的回调其实就是一个方法，我的理解是它更像一个事件。比如ChannelHandler的channelActive的方法，在一个新的连接被建立时进行回调。</p>
 <h3 id="事件和ChannelHandler"><a href="#事件和ChannelHandler" class="headerlink" title="事件和ChannelHandler"></a>事件和ChannelHandler</h3><p>ChannelHandler 我认为是内容处理器，所有的接收的数据都由ChannelHandler进行处理，包括出站和入站处理数据。事件也主要指的是ChannelHandler中的各种的方法。ChannelHander在netty中是链形进行处理，如下图所示：</p>
-<p><img src="netty-study/ChannelHandler-event.png" alt="事件流程图"></p>
+<p><img src="/2019/06/03/java/base/netty-study/ChannelHandler-event.png" alt="事件流程图"></p>
 <p>ChannelHandler 生命周期方法：</p>
 <ul>
 <li>handlerAdded  ChannelHandler 添加到 ChannelPipeline 中调用</li>

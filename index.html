@@ -56,6 +56,49 @@
   <div class="posts-list">
     
       <section>
+        <a href="/2022/08/17/java/spring-cloud/springapplication-run-two/">
+          <h3 class="post-head">
+            SpringApplication#run 调用两次
+          </h3>
+        </a>
+        
+        <div class="post-content">
+          
+            
+              
+                <p>在使用nacos作为配置中心的过程中，debug源码的过程中发现，作为启动类的<code>SpringApplication#run</code>这个方法会调用两次，就很奇怪。</p>
+              
+          
+        </div>
+        <div class="post-meta">
+          <i class="fa fa-calendar" aria-hidden="true"></i> <time>2022年08月17日</time>
+          
+            | <i class="fa fa-folder-open-o" aria-hidden="true"></i> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/spring-cloud/">spring-cloud</a>
+  </div>
+
+
+
+          
+          
+            <span class="seperator">|</span>
+             
+                <i class="fa fa-tags" aria-hidden="true"></i>
+              
+             
+  <a href="/tags/#java" class="tag">java</a>
+
+  <a href="/tags/#spring-cloud" class="tag">spring-cloud</a>
+
+  <a href="/tags/#spring" class="tag">spring</a>
+
+
+          
+        </div>
+      </section>
+    
+      <section>
         <a href="/2022/06/23/algorithm/consensus/raft/">
           <h3 class="post-head">
             共识算法 raft
@@ -308,6 +351,11 @@
         
         <div class="post-content">
           
+            
+              
+                <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuickSort</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] numbers = &#123;<span class="number">10</span>, <span class="number">3</span>, <span class="number">11</span>, <span class="number">9</span>, <span class="number">5</span>&#125;;</span><br><span class="line"></span><br><span class="line">        quickImpl(numbers, <span class="number">0</span>, numbers.length -<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        Stream.of(numbers).forEach(System.out::println);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; numbers.length; i++) &#123;</span><br><span class="line">            System.out.println(numbers[i]);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">quickImpl</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> l, <span class="keyword">int</span> h)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (l &gt;= h) <span class="keyword">return</span>;</span><br><span class="line">        <span class="keyword">int</span> mid = l;</span><br><span class="line">        <span class="keyword">int</span> i = l;</span><br><span class="line">        <span class="keyword">int</span> j = h + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span> (i &lt; j) &#123;</span><br><span class="line">            <span class="keyword">while</span> (arr[++i] &lt; arr[mid]) <span class="keyword">if</span> (i == h) <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">while</span> (arr[--j] &gt; arr[mid]) <span class="keyword">if</span> (j == l) <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">if</span> (i &gt; j) <span class="keyword">break</span>;</span><br><span class="line">            exch(arr, i, j);</span><br><span class="line">        &#125;</span><br><span class="line">        exch(arr, mid, j);</span><br><span class="line"></span><br><span class="line">        quickImpl(arr, l, j - <span class="number">1</span>);</span><br><span class="line">        quickImpl(arr, j + <span class="number">1</span>, h);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">exch</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> i, <span class="keyword">int</span> j)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> temp = arr[i];</span><br><span class="line">        arr[i] = arr[j];</span><br><span class="line">        arr[j] = temp;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+              
+          
         </div>
         <div class="post-meta">
           <i class="fa fa-calendar" aria-hidden="true"></i> <time>2021年08月12日</time>
@@ -365,11 +413,11 @@
                 <i class="fa fa-tags" aria-hidden="true"></i>
               
              
-  <a href="/tags/#nodejs" class="tag">nodejs</a>
-
   <a href="/tags/#js" class="tag">js</a>
 
   <a href="/tags/#joi" class="tag">joi</a>
+
+  <a href="/tags/#nodejs" class="tag">nodejs</a>
 
   <a href="/tags/#web" class="tag">web</a>
 
@@ -417,47 +465,6 @@
         </div>
       </section>
     
-      <section>
-        <a href="/2020/05/07/js/nodejs-epub/">
-          <h3 class="post-head">
-            nodejs 制作 epub书籍
-          </h3>
-        </a>
-        
-        <div class="post-content">
-          
-            
-              
-                <p>使用nodejs制作epub书籍，代码记录</p>
-              
-          
-        </div>
-        <div class="post-meta">
-          <i class="fa fa-calendar" aria-hidden="true"></i> <time>2020年05月07日</time>
-          
-            | <i class="fa fa-folder-open-o" aria-hidden="true"></i> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/nodejs/">nodejs</a>
-  </div>
-
-
-
-          
-          
-            <span class="seperator">|</span>
-             
-                <i class="fa fa-tags" aria-hidden="true"></i>
-              
-             
-  <a href="/tags/#nodejs" class="tag">nodejs</a>
-
-  <a href="/tags/#epub" class="tag">epub</a>
-
-
-          
-        </div>
-      </section>
-    
   </div>
   <aside>
     
@@ -468,7 +475,7 @@
           文章分类
         </h1>
         <div class="content">
-          <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/activemq/">activemq</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/go/">go</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/java/jvm/">jvm</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/jdk/">jdk</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/js/">js</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mac/">mac</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/netty/">netty</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nodejs/">nodejs</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/swift/">swift</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/thenjs/">thenjs</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/vscode/">vscode</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据库/">数据库</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/版本控制/">版本控制</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/算法/">算法</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
+          <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/activemq/">activemq</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/go/">go</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/java/jvm/">jvm</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/jdk/">jdk</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/js/">js</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mac/">mac</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/netty/">netty</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nodejs/">nodejs</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring-cloud/">spring-cloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/swift/">swift</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/thenjs/">thenjs</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/vscode/">vscode</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据库/">数据库</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/版本控制/">版本控制</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/算法/">算法</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/面试/">面试</a></li></ul>
         </div>
       </div>
     

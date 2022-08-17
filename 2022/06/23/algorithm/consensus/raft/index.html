@@ -95,7 +95,7 @@
 <li>当<strong>Candidate</strong>收到超过半数的投票通过之后，就能够成功当选为<strong>Leader</strong>，开始处理客户端的请求，并将请求日志复制给其他节点</li>
 </ul>
 <h2 id="安全"><a href="#安全" class="headerlink" title="安全"></a>安全</h2><p>在选择Leader的时候，我们肯定希望选择出来的Leader是数据最全的，raft在发送日志上做了处理。这里简单用json做下说明</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="string">"term"</span>: <span class="number">11</span>, <span class="comment">// 任期</span></span><br><span class="line">	<span class="string">"seq"</span>: <span class="number">1</span>, <span class="comment">// 序号</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="string">"term"</span>: <span class="number">11</span>, <span class="comment">// 任期</span></span><br><span class="line">	<span class="string">"seq"</span>: <span class="number">1</span>, <span class="comment">// 序号</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>每个节点都会有一个<strong>任期</strong>，<strong>Leader</strong>在发送每个日志的时候都会加上一个递增的<strong>序号</strong>。</p>
 <p>在选举投票的时候，每个节点，只会把票投给日志最新的节点数据。即任期最大，或者任期相同日志序号大的节点。</p>
 <p>如果发起投票节点不是最新节点，那么当前节点会投票给自己。</p>

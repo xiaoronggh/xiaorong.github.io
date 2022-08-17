@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  
+    <link rel="icon" href="">
+  
+    
+  <title>SpringApplication#run 调用两次 | 奋斗的斗斗的博客</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class="logo" href="/">
+      <span>奋斗的斗斗的博客</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id="post">
+  <div class="content">
+    <article>
+        <section class="content markdown-body">
+          <h1>SpringApplication#run 调用两次</h1>
+          <div class="post-meta">
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2022年08月17日</time>
+            
+              | <i class="fa fa-folder-open-o" aria-hidden="true"></i> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/spring-cloud/">spring-cloud</a>
+  </div>
+
+
+
+            
+            
+              | 
+                  <i class="fa fa-tags" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#java" class="tag">java</a>
+
+  <a href="/tags/#spring-cloud" class="tag">spring-cloud</a>
+
+  <a href="/tags/#spring" class="tag">spring</a>
+
+
+            
+          </div>
+          <p>在使用nacos作为配置中心的过程中，debug源码的过程中发现，作为启动类的<code>SpringApplication#run</code>这个方法会调用两次，就很奇怪。</p>
+<h2 id="调用两次原理"><a href="#调用两次原理" class="headerlink" title="调用两次原理"></a>调用两次原理</h2><p>通过跟踪调试发现，是在<code>BootstrapApplicationListener</code>中再次调用了<code>SpringApplication</code>,相关的代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 构建了一个SpringApplication的构建器，内置了一个SpingApplication对象</span></span><br><span class="line">SpringApplicationBuilder builder = <span class="keyword">new</span> SpringApplicationBuilder()</span><br><span class="line">	.profiles(environment.getActiveProfiles()).bannerMode(Mode.OFF)</span><br><span class="line">	.environment(bootstrapEnvironment)</span><br><span class="line">	<span class="comment">// Don't use the default properties in this builder</span></span><br><span class="line">	.registerShutdownHook(<span class="keyword">false</span>).logStartupInfo(<span class="keyword">false</span>)</span><br><span class="line">	.web(WebApplicationType.NONE);</span><br><span class="line"><span class="comment">// ....省略代码</span></span><br><span class="line"><span class="comment">// 这里的调用run方法，本质上就是调用了SpringApplication#run的方法</span></span><br><span class="line"><span class="comment">// 所以我们会看到，两次调用run方法。</span></span><br><span class="line"><span class="keyword">final</span> ConfigurableApplicationContext context = builder.run();</span><br></pre></td></tr></table></figure>
+<p>ps：上面代码方法调用栈：<code>onApplicationEvent-&gt;bootstrapServiceContext</code></p>
+<p>构建SpringApplicationBuilder的代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">SpringApplicationBuilder</span><span class="params">(Class&lt;?&gt;... sources)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.application = createSpringApplication(sources);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">protected</span> SpringApplication <span class="title">createSpringApplication</span><span class="params">(Class&lt;?&gt;... sources)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SpringApplication(sources);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>为啥只有spring-cloud会执行两次，而一个普通的springboot没有，根本原因是spring-boot是没有<code>BootstrapApplicationListener</code>这个监听器。这个监听器的配置是在<code>spring-cloud-context</code>这个jar包下的<code>spring.factories</code>，如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># Application Listeners</span><br><span class="line">org.springframework.context.ApplicationListener=\</span><br><span class="line">org.springframework.cloud.bootstrap.BootstrapApplicationListener,\</span><br><span class="line">org.springframework.cloud.bootstrap.LoggingSystemShutdownListener,\</span><br><span class="line">org.springframework.cloud.context.restart.RestartListener</span><br><span class="line"></span><br><span class="line"># Bootstrap components</span><br><span class="line">org.springframework.cloud.bootstrap.BootstrapConfiguration=\</span><br><span class="line">org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration,\</span><br><span class="line">org.springframework.cloud.bootstrap.encrypt.EncryptionBootstrapConfiguration,\</span><br><span class="line">org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration,\</span><br><span class="line">org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration</span><br></pre></td></tr></table></figure>
+<p>这个监听器的作用是什么呢？我们可以看下这个监听器的注释：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">A listener that prepares a <span class="title">SpringApplication</span> <span class="params">(e.g. populating its Environment)</span> by</span></span><br><span class="line"><span class="function">delegating to </span>&#123;<span class="meta">@link</span> ApplicationContextInitializer&#125; beans in a separate bootstrap</span><br><span class="line">context. The bootstrap context is a SpringApplication created from sources defined in</span><br><span class="line">spring.factories as &#123;<span class="meta">@link</span> BootstrapConfiguration&#125;, and initialized with external</span><br><span class="line">config taken from <span class="string">"bootstrap.properties"</span> (or yml), instead of the normal</span><br><span class="line"><span class="string">"application.properties"</span>.</span><br></pre></td></tr></table></figure>
+<p>我理解的大概意思就是，创建一个Context上下文，用来解析定义在spring.factories中定义的资源信息，从bootstrap的配置文件中初始化额外的配置信息，代替正常的配置信息(application.properties)</p>
+<p>这个监听器的出现，使我们可以在服务启动之前加载自定义的配置信息，这个配置信息可以是远程的，也可以是本地的。nacos的spring-cloud版本能够实现从远程加载配置信息，就是利用了这个监听器</p>
+<h2 id="使用BootstrapApplicationListener加载配置原理"><a href="#使用BootstrapApplicationListener加载配置原理" class="headerlink" title="使用BootstrapApplicationListener加载配置原理"></a>使用BootstrapApplicationListener加载配置原理</h2><p>通过上文，我们知道了监听器调用了<code>bootstrapServiceContext</code>方法，加载配置的关键是在这个方法中实现的，下面我们继续解析这个方法，上代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> ConfigurableApplicationContext <span class="title">bootstrapServiceContext</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">			ConfigurableEnvironment environment, <span class="keyword">final</span> SpringApplication application,</span></span></span><br><span class="line"><span class="function"><span class="params">			String configName)</span> </span>&#123;</span><br><span class="line">		StandardEnvironment bootstrapEnvironment = <span class="keyword">new</span> StandardEnvironment();</span><br><span class="line">		MutablePropertySources bootstrapProperties = bootstrapEnvironment</span><br><span class="line">				.getPropertySources();</span><br><span class="line"></span><br><span class="line">		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();</span><br><span class="line">		<span class="comment">// 加载spring.factories中配置类型为BootstrapConfiguration.class的数据</span></span><br><span class="line">                <span class="comment">// names就是配置类的名称的集合</span></span><br><span class="line">                <span class="comment">// 此时我们会加载到一个PropertySourceBootstrapConfiguration配置信息</span></span><br><span class="line">		List&lt;String&gt; names = <span class="keyword">new</span> ArrayList&lt;&gt;(SpringFactoriesLoader</span><br><span class="line">				.loadFactoryNames(BootstrapConfiguration.class, classLoader));</span><br><span class="line">		<span class="keyword">for</span> (String name : StringUtils.commaDelimitedListToStringArray(</span><br><span class="line">				environment.getProperty(<span class="string">"spring.cloud.bootstrap.sources"</span>, <span class="string">""</span>))) &#123;</span><br><span class="line">			names.add(name);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 创建SpringApplication</span></span><br><span class="line">		SpringApplicationBuilder builder = <span class="keyword">new</span> SpringApplicationBuilder()</span><br><span class="line">				.profiles(environment.getActiveProfiles()).bannerMode(Mode.OFF)</span><br><span class="line">				.environment(bootstrapEnvironment)</span><br><span class="line">				.registerShutdownHook(<span class="keyword">false</span>).logStartupInfo(<span class="keyword">false</span>)</span><br><span class="line">				.web(WebApplicationType.NONE);</span><br><span class="line">		<span class="comment">// 判断names对应的类是否存在，只保留存在的类</span></span><br><span class="line">		List&lt;Class&lt;?&gt;&gt; sources = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">		<span class="keyword">for</span> (String name : names) &#123;</span><br><span class="line">			Class&lt;?&gt; cls = ClassUtils.resolveClassName(name, <span class="keyword">null</span>);</span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				cls.getDeclaredAnnotations();</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">				<span class="keyword">continue</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			sources.add(cls);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 这里将sources添加到SpringApplication的实例上</span></span><br><span class="line">		builder.sources(sources.toArray(<span class="keyword">new</span> Class[sources.size()]));</span><br><span class="line">                <span class="comment">// 执行run方法之后，会将sources实例化成bean并注入到context中</span></span><br><span class="line">		<span class="keyword">final</span> ConfigurableApplicationContext context = builder.run();</span><br><span class="line">		<span class="keyword">return</span> context;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>我们继续回到<code>onApplicationEvent</code>中，生成context之后，调用<code>apply</code>方法将context中的<code>ApplicationContextInitializer</code>类的实现添加到<code>SpringAppliation</code>实例中（注意：这里的实例是第一次调用run方法生成的）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (context == <span class="keyword">null</span>) &#123;</span><br><span class="line">    context = bootstrapServiceContext(environment, event.getSpringApplication(),</span><br><span class="line">					configName);</span><br><span class="line">&#125;</span><br><span class="line">apply(context, event.getSpringApplication(), environment);</span><br></pre></td></tr></table></figure>
+<p>继续看apply方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">apply</span><span class="params">(ConfigurableApplicationContext context,</span></span></span><br><span class="line"><span class="function"><span class="params">			SpringApplication application, ConfigurableEnvironment environment)</span> </span>&#123;</span><br><span class="line">		<span class="meta">@SuppressWarnings</span>(<span class="string">"rawtypes"</span>)</span><br><span class="line">        <span class="comment">// 从新生成的Context中获取ApplicationContextInitializer实例</span></span><br><span class="line">	List&lt;ApplicationContextInitializer&gt; initializers = getOrderedBeansOfType(context,</span><br><span class="line">				ApplicationContextInitializer.class);</span><br><span class="line">        <span class="comment">// 将ApplicationContextInitializer的实例添加到第一次生成SpringApplication中</span></span><br><span class="line">        <span class="comment">// 这里的实例就包括一个PropertySourceBootstrapConfiguration实例</span></span><br><span class="line">	application.addInitializers(initializers</span><br><span class="line">				.toArray(<span class="keyword">new</span> ApplicationContextInitializer[initializers.size()]));</span><br><span class="line">	addBootstrapDecryptInitializer(application);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行完毕之后，会继续执行第一次SpringApplication的run方法，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 调用event事件</span></span><br><span class="line">ConfigurableEnvironment environment = prepareEnvironment(listeners,</span><br><span class="line">					applicationArguments);</span><br><span class="line"><span class="comment">// 执行ApplicationContextInitializer方法的初始化</span></span><br><span class="line">prepareContext(context, environment, listeners, applicationArguments,</span><br><span class="line">					printedBanner);</span><br></pre></td></tr></table></figure>
+<p>可以看到，通过监听器，我们添加了额外的ApplicationContextInitializer实例（PropertySourceBootstrapConfiguration）到SpringApplication中，PropertySourceBootstrapConfiguration类用来加载额外的配置信息，实现自定义配置信息</p>
+<h2 id="PropertySourceBootstrapConfiguration解析"><a href="#PropertySourceBootstrapConfiguration解析" class="headerlink" title="PropertySourceBootstrapConfiguration解析"></a>PropertySourceBootstrapConfiguration解析</h2><p>如代码所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@EnableConfigurationProperties</span>(PropertySourceBootstrapProperties.class)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PropertySourceBootstrapConfiguration</span> <span class="keyword">implements</span></span></span><br><span class="line"><span class="class">		<span class="title">ApplicationContextInitializer</span>&lt;<span class="title">ConfigurableApplicationContext</span>&gt;, <span class="title">Ordered</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Autowired</span>(required = <span class="keyword">false</span>)</span><br><span class="line">    <span class="keyword">private</span> List&lt;PropertySourceLocator&gt; propertySourceLocators = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">  </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initialize</span><span class="params">(ConfigurableApplicationContext applicationContext)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 进行初始化操作</span></span><br><span class="line">        <span class="keyword">for</span> (PropertySourceLocator locator : <span class="keyword">this</span>.propertySourceLocators) &#123;</span><br><span class="line">            <span class="comment">// 遍历propertySourceLocators获取配置信息，将获取到的配置信息全部放到</span></span><br><span class="line">            <span class="comment">// composite中</span></span><br><span class="line">		PropertySource&lt;?&gt; source = <span class="keyword">null</span>;</span><br><span class="line">		source = locator.locate(environment);</span><br><span class="line">		<span class="keyword">if</span> (source == <span class="keyword">null</span>) &#123;</span><br><span class="line">		    <span class="keyword">continue</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	        logger.info(<span class="string">"Located property source: "</span> + source);</span><br><span class="line">		composite.addPropertySource(source);</span><br><span class="line">		empty = <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!empty) &#123;</span><br><span class="line">            <span class="comment">// 将配置信息放到environment中，后面初始化应该就会使用这里的配置信息</span></span><br><span class="line">            MutablePropertySources propertySources = environment.getPropertySources();</span><br><span class="line">            insertPropertySources(propertySources, composite);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个类有一个属性是<code>PropertySourceLocator</code>的集合，注意该属性上有<code>Autowired</code>注解，所以我们只要实例化<code>PropertySourceLocator</code>就会添加到这里，完成自定义配置的加载。</p>
+<p>还记得上文中讲到，<code>bootstrapServiceContext</code>会将<code>BootstrapConfiguration</code>类型的配置实例化到context中，所以我们只要添加对应的配置信息就可以了。nacos的配置如下：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">org.springframework.cloud.bootstrap.BootstrapConfiguration=\</span></span><br><span class="line"><span class="string">com.alibaba.cloud.nacos.NacosConfigBootstrapConfiguration</span></span><br><span class="line"><span class="string">org.springframework.boot.autoconfigure.EnableAutoConfiguration=\</span></span><br><span class="line"><span class="string">com.alibaba.cloud.nacos.NacosConfigAutoConfiguration,\</span></span><br><span class="line"><span class="string">com.alibaba.cloud.nacos.endpoint.NacosConfigEndpointAutoConfiguration</span></span><br><span class="line"><span class="string">org.springframework.boot.diagnostics.FailureAnalyzer=\</span></span><br><span class="line"><span class="string">com.alibaba.cloud.nacos.diagnostics.analyzer.NacosConnectionFailureAnalyzer</span></span><br><span class="line"><span class="string">org.springframework.boot.env.PropertySourceLoader=\</span></span><br><span class="line"><span class="string">com.alibaba.cloud.nacos.parser.NacosJsonPropertySourceLoader,\</span></span><br><span class="line"><span class="string">com.alibaba.cloud.nacos.parser.NacosXmlPropertySourceLoader</span></span><br></pre></td></tr></table></figure>
+<p>ps: 该配置来自spring-cloud-starter-alibaba-nacos-config 2.0.4-release版本</p>
+
+        </section>
+    </article>
+    
+        
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#调用两次原理"><span class="toc-number">1.</span> <span class="toc-text">调用两次原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用BootstrapApplicationListener加载配置原理"><span class="toc-number">2.</span> <span class="toc-text">使用BootstrapApplicationListener加载配置原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PropertySourceBootstrapConfiguration解析"><span class="toc-number">3.</span> <span class="toc-text">PropertySourceBootstrapConfiguration解析</span></a></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2022 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>
